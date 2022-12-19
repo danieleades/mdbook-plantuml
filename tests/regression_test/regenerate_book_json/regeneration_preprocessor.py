@@ -1,6 +1,6 @@
 import json
-import sys
 import os
+import sys
 
 if __name__ == "__main__":
     if "supports" in sys.argv:
@@ -18,11 +18,10 @@ if __name__ == "__main__":
     book[0]["config"]["book"]["src"] = "test_output"
 
     # Replace this preprocessor with the plantuml preprocessor
-    book[0]["config"]["preprocessor"] = {
-        "plantuml": {}
-    }
+    book[0]["config"]["preprocessor"] = {"plantuml": {}}
     open("../book.json", "w").write(json.dumps(book, indent="  "))
 
-    sys.stderr.write("Successfully generated ../book.json, but BOOK BUILDING WILL BE FORCED TO FAIL.\n")
+    sys.stderr.write(
+        "Successfully generated ../book.json, but BOOK BUILDING WILL BE FORCED TO FAIL.\n"
+    )
     sys.exit(-1)
-

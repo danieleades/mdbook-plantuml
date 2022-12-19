@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "mdbook-plantuml"
+version = "0.1.0"
+description = ""
+authors = ["daniel.eades <daniel.eades@hotmail.com>"]
+readme = "README.md"
+packages = [{include = "mdbook_plantuml"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+black = "^22.12.0"
+flake8 = "^6.0.0"
+isort = "^5.11.3"
+pep8-naming = "^0.13.2"
+flake8-simplify = "^0.19.3"
+flake8-comprehensions = "^3.10.1"
+flake8-bugbear = "^22.12.6"
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

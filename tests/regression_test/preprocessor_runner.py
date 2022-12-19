@@ -1,8 +1,9 @@
 import copy
 import json
+import logging
 import os
 import subprocess
-import logging
+
 import file_locations
 
 
@@ -36,18 +37,18 @@ class Chapter:
         path += self.name + "_" + "-".join(map(str, number)) + ".md"
 
         data = {
-          "name": self.name,
-          "content": self.content,
-          "number": number,
-          "sub_items": [],
-          "path": path,
-          "parent_names": [] #TODO fill this when needed
+            "name": self.name,
+            "content": self.content,
+            "number": number,
+            "sub_items": [],
+            "path": path,
+            "parent_names": [],  # TODO fill this when needed
         }
 
         for i, sub in enumerate(self.sub_items):
             sub_number = list(number)
             sub_number.append(i + 1)
-            data["sub_items"].append (sub.to_dict(sub_number))
+            data["sub_items"].append(sub.to_dict(sub_number))
 
         return {"Chapter": data}
 
@@ -66,13 +67,18 @@ class PreprocessorRunner:
 
     def run(self):
         tester_root = os.path.dirname(__file__)
-        preprocessor_cmd = os.path.join(tester_root, "..", "..", "target",
-                                        "release", "mdbook-plantuml")
+        preprocessor_cmd = os.path.join(
+            tester_root, "..", "..", "target", "release", "mdbook-plantuml"
+        )
         logging.info(f"Preprocessor cmd: '{preprocessor_cmd}'")
-        json.dump(self.__book, open(os.path.join(file_locations.get_test_output_dir(), "book.json"), "w"), indent=2)
+        json.dump(
+            self.__book,
+            open(os.path.join(file_locations.get_test_output_dir(), "book.json"), "w"),
+            indent=2,
+        )
 
         env = copy.deepcopy(os.environ)
-        env["RUST_BACKTRACE"]="full"
+        env["RUST_BACKTRACE"] = "full"
 
         proc = subprocess.Popen(
             [preprocessor_cmd],
@@ -80,18 +86,14 @@ class PreprocessorRunner:
             cwd=file_locations.get_test_output_dir(),
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
-        stdout, stderr = proc.communicate(json.dumps(self.__book).encode(),
-                                          timeout=5.0)
+        stdout, stderr = proc.communicate(json.dumps(self.__book).encode(), timeout=5.0)
         logging.error(f"{preprocessor_cmd} stderr: {stderr}")
         if proc.returncode != 0:
             logging.error(f"{preprocessor_cmd} stderr: {stderr}")
             raise subprocess.CalledProcessError(
-                proc.returncode,
-                preprocessor_cmd,
-                stdout,
-                stderr
+                proc.returncode, preprocessor_cmd, stdout, stderr
             )
 
         return Result(stdout)

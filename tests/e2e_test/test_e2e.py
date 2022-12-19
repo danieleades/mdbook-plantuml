@@ -1,11 +1,12 @@
-import unittest
-import subprocess
 import os
-import shutil
-import preprocessor_builder
-import webbrowser
 import platform
+import shutil
+import subprocess
 import time
+import unittest
+import webbrowser
+
+import preprocessor_builder
 import toml
 
 
@@ -48,17 +49,22 @@ def _build_book(book_name, open_browser=True, output_dir=None, clean=True):
         env["PATH"] = preprocessor_dir + ":" + env["PATH"]
 
     args = ["mdbook", "build"]
-    proc = subprocess.Popen(args,
+    proc = subprocess.Popen(
+        args,
         cwd=module_dir,
         env=env,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+        stderr=subprocess.PIPE,
+    )
 
     stdout, stderr = proc.communicate()
     if proc.returncode != 0:
-        print("Error building book {} (exit code {}) with args: {}"
-            .format(book_name, proc.returncode, " ".join(args)))
+        print(
+            "Error building book {} (exit code {}) with args: {}".format(
+                book_name, proc.returncode, " ".join(args)
+            )
+        )
         print("Stdout:\n===============================")
         print(stdout)
 
@@ -66,7 +72,7 @@ def _build_book(book_name, open_browser=True, output_dir=None, clean=True):
         print(stderr)
     elif open_browser:
         index_html = os.path.join(book_output_dir, "index.html")
-        webbrowser.open('file://' + index_html)
+        webbrowser.open("file://" + index_html)
 
     return proc.returncode == 0
 
@@ -79,7 +85,7 @@ class TestEndToEndServer(unittest.TestCase):
 
     def test_https_server(self):
         assert preprocessor_builder.build_https_server()
-        #TODO: Run https server somewhere
+        # TODO: Run https server somewhere
         assert _build_book("plantuml_server.toml", output_dir="plantuml_ssl_server")
 
 
@@ -100,7 +106,11 @@ class TestEndToEndShell(unittest.TestCase):
 
     def test_dir_cleaner(self):
         assert _build_book("plantuml_shell.toml", output_dir="plantuml_dir_cleaner")
-        assert _build_book("plantuml_shell.toml", output_dir="plantuml_dir_cleaner_no_clean", clean=False)
+        assert _build_book(
+            "plantuml_shell.toml",
+            output_dir="plantuml_dir_cleaner_no_clean",
+            clean=False,
+        )
 
     def test_cache(self):
         cache_dir = os.path.join(get_module_dir(), ".plantuml-cache")
@@ -120,4 +130,6 @@ class TestEndToEndShell(unittest.TestCase):
         self.assertLess(cached_time, uncached_time / 4)
 
     def test_shell_has_no_server(self):
-        assert not _build_book("plantuml_server.toml", output_dir="plantuml_server_fail")
+        assert not _build_book(
+            "plantuml_server.toml", output_dir="plantuml_server_fail"
+        )

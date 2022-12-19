@@ -1,28 +1,32 @@
-
 class Snippet:
     def __init__(self, code, extra=""):
         self.plantuml_code = code
         if extra:
             extra = "," + extra
         # Assert we can format a valid code block without
-        assert self.plantuml_code[-1] == "\n" 
+        assert self.plantuml_code[-1] == "\n"
         self.markdown = "```plantuml{}\n{}```".format(extra, self.plantuml_code)
 
 
-ab_class_diagram = Snippet("""\
+ab_class_diagram = Snippet(
+    """\
 @startuml
 A --|> B
 @enduml
-""")
+"""
+)
 
-cd_class_diagram = Snippet("""\
+cd_class_diagram = Snippet(
+    """\
 @startuml
 C --|> D
 @enduml
-""")
+"""
+)
 
 
-ditaa = Snippet("""\
+ditaa = Snippet(
+    """\
 @startditaa
 +--------+   +-------+    +-------+
 |        +---+ ditaa +--> |       |
@@ -34,10 +38,14 @@ ditaa = Snippet("""\
     |       Lots of work      |
     +-------------------------+
 @endditaa
-""")
+"""
+)
 
-utxt_format = Snippet("""\
+utxt_format = Snippet(
+    """\
 @startuml
 C --|> D
 @enduml
-""", "format=utxt")
+""",
+    "format=utxt",
+)

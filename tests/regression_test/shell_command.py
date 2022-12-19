@@ -4,9 +4,10 @@ It is used to capture the arguments plantuml is called with and returns a fake
 'image' which stores the command line plantuml would have been called with for
 that file.
 """
-import sys
-import os
 import json
+import os
+import sys
+
 import file_locations
 
 if __name__ == "__main__":
@@ -29,15 +30,14 @@ if __name__ == "__main__":
 
     if "-pipe" in sys.argv:
         plantuml_code = sys.stdin.read()
-        
+
         # Dump the command line arguments and resulting image location in the
         # 'image file'. The tester can then check these for validity.
         print(" ".join(sys.argv[1:]))
 
-        prev_commands.append({
-            "arguments": sys.argv[1:],
-            "plantuml-code": plantuml_code
-        })
+        prev_commands.append(
+            {"arguments": sys.argv[1:], "plantuml-code": plantuml_code}
+        )
     else:
         # Dump the command line arguments and resulting image location in the
         # 'image file'. The tester can then check these for validity
@@ -45,14 +45,13 @@ if __name__ == "__main__":
         # on.
         open(img_filename, "w").write(" ".join(sys.argv))
 
-        prev_commands.append({
-            "arguments": sys.argv[1:],
-            "plantuml-code": open(sys.argv[-1], "rt").read()
-        })
+        prev_commands.append(
+            {
+                "arguments": sys.argv[1:],
+                "plantuml-code": open(sys.argv[-1], "rt").read(),
+            }
+        )
 
     json.dump(
-        prev_commands,
-        open(file_locations.get_shell_calls_file(), "wt"),
-        indent=2
+        prev_commands, open(file_locations.get_shell_calls_file(), "wt"), indent=2
     )
-

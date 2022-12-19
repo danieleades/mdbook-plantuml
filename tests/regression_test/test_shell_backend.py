@@ -1,19 +1,24 @@
-import unittest
-import os
 import base64
 import hashlib
-import shutil
 import json
-from parameterized import parameterized, parameterized_class
-from preprocessor_runner import *
-from file_locations import get_plantuml_calls_file, get_test_output_dir
+import os
+import shutil
+import unittest
+
 import markdown_snippets
 import preprocessor_builder
+from file_locations import get_plantuml_calls_file, get_test_output_dir
+from parameterized import parameterized, parameterized_class
+from preprocessor_runner import *
 
-@parameterized_class(('piped', 'data_uri'), [
-   (False, False),
-   (True, True),
-])
+
+@parameterized_class(
+    ("piped", "data_uri"),
+    [
+        (False, False),
+        (True, True),
+    ],
+)
 class TestShellBackend(unittest.TestCase):
 
     """
@@ -23,6 +28,7 @@ class TestShellBackend(unittest.TestCase):
     arguments to a file (test_output/plantuml_calls.txt) so we can check it was
     called with the correct arguments.
     """
+
     @classmethod
     def setUpClass(cls):
         # make sure python is on the path. It is used to fake the plantuml
@@ -42,12 +48,16 @@ class TestShellBackend(unittest.TestCase):
             os.remove(get_plantuml_calls_file())
 
         self.runner = PreprocessorRunner()
-        fake_plantuml = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fake_plantuml.py")
-        self.runner.set_preprocessor_config({
-            "plantuml-cmd": f"python {fake_plantuml}",
-            "piped": self.piped,
-            "use-data-uris": self.data_uri,
-        })
+        fake_plantuml = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "fake_plantuml.py"
+        )
+        self.runner.set_preprocessor_config(
+            {
+                "plantuml-cmd": f"python {fake_plantuml}",
+                "piped": self.piped,
+                "use-data-uris": self.data_uri,
+            }
+        )
 
     def get_plantuml_calls(self):
         assert os.path.exists(get_plantuml_calls_file())
@@ -67,13 +77,17 @@ class TestShellBackend(unittest.TestCase):
         filename = self.__get_image_filename(call)
 
         if "-pipe" in call["arguments"]:
-            filename = os.path.join(get_test_output_dir(), ".mdbook-plantuml-cache", filename)
+            filename = os.path.join(
+                get_test_output_dir(), ".mdbook-plantuml-cache", filename
+            )
         else:
-            filename = os.path.join(get_test_output_dir(), "mdbook-plantuml-img", filename)
+            filename = os.path.join(
+                get_test_output_dir(), "mdbook-plantuml-img", filename
+            )
 
-        return filename        
+        return filename
 
-    def assertFileIsCreated(self, call):
+    def assert_file_is_created(self, call):
         img_path = self.__get_image_path(call)
         assert os.path.isfile(img_path)
 
@@ -85,7 +99,7 @@ class TestShellBackend(unittest.TestCase):
                 img_type = "png"
 
             img_path = self.__get_image_path(call)
-            img_data = open(img_path).read()            
+            img_data = open(img_path).read()
             b64_data = base64.b64encode(img_data.encode()).decode()
 
             return f"data:image/{img_type};base64," + b64_data
@@ -94,10 +108,12 @@ class TestShellBackend(unittest.TestCase):
             url = prefix + "mdbook-plantuml-img/" + filename
             return "![]({url})".format(url=url)
 
-    @parameterized.expand([
-        (markdown_snippets.ab_class_diagram, "svg"),
-        (markdown_snippets.ditaa, "png"),
-    ])
+    @parameterized.expand(
+        [
+            (markdown_snippets.ab_class_diagram, "svg"),
+            (markdown_snippets.ditaa, "png"),
+        ]
+    )
     def test_plantuml_invocation(self, snippet, expected_ext):
         self.runner.set_content(Chapter("Chapter 1", snippet.markdown))
 
@@ -107,20 +123,21 @@ class TestShellBackend(unittest.TestCase):
         self.assertEqual(1, len(calls))
         call = calls[0]
         self.assertIn("-t" + expected_ext, call["arguments"])
-        self.assertFileIsCreated(call)
+        self.assert_file_is_created(call)
         self.assertEqual(snippet.plantuml_code, call["plantuml-code"])
 
         # Finally check if the correct link is in the chapter data
-        self.assertIn(self.format_md_link(call),
-                      result.root_chapter["content"])
+        self.assertIn(self.format_md_link(call), result.root_chapter["content"])
 
-    @parameterized.expand([
-        (markdown_snippets.utxt_format, "utxt"),
-    ])
+    @parameterized.expand(
+        [
+            (markdown_snippets.utxt_format, "utxt"),
+        ]
+    )
     def test_plantuml_format_invocation(self, snippet, expected_ext):
         self.runner.set_content(Chapter("Chapter 1", snippet.markdown))
 
-        result = self.runner.run()
+        self.runner.run()
 
         calls = self.get_plantuml_calls()
         self.assertEqual(1, len(calls))
@@ -129,10 +146,8 @@ class TestShellBackend(unittest.TestCase):
         self.assertEqual(snippet.plantuml_code, call["plantuml-code"])
 
     def test_nested_chapters(self):
-        root_chapter = Chapter(
-            "Chapter 1", markdown_snippets.ab_class_diagram.markdown)
-        sub_chapter = Chapter(
-            "Nested 1", markdown_snippets.cd_class_diagram.markdown)
+        root_chapter = Chapter("Chapter 1", markdown_snippets.ab_class_diagram.markdown)
+        sub_chapter = Chapter("Nested 1", markdown_snippets.cd_class_diagram.markdown)
         root_chapter.sub_items.append(sub_chapter)
 
         self.runner.set_content(root_chapter)
@@ -142,10 +157,10 @@ class TestShellBackend(unittest.TestCase):
         self.assertEqual(2, len(calls))
 
         # Note that the calling order might change when the mdBook library changes
-        self.assertIn(self.format_md_link(calls[1]),
-                      result.root_chapter["content"])
-        self.assertIn(self.format_md_link(calls[0], "../"),
-                      result.nested_chapter["content"])
+        self.assertIn(self.format_md_link(calls[1]), result.root_chapter["content"])
+        self.assertIn(
+            self.format_md_link(calls[0], "../"), result.nested_chapter["content"]
+        )
 
     def test_mathjax_is_untouched(self):
         mathjax = r"\\( \int x dx = \frac{x^2}{2} + C \\)"
