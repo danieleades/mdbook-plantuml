@@ -20,7 +20,7 @@ plantuml-server=["reqwest", "deflate"]
 plantuml-ssl-server=["reqwest/rustls-tls", "deflate"]
 
 [dependencies]
-mdbook = { version = "0.4.21", default-features = false }
+mdbook = { version = "0.4.28", default-features = false }
 serde = { version = "1.0.145", features = ["derive"] }
 serde_json = "1.0.85"
 log = "0.4.17"
